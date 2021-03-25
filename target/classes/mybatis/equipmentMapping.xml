@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mapper.equipmentMapper">
+  <resultMap id="BaseResultMap" type="com.project.entity.Equipment">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="equip_name" jdbcType="VARCHAR" property="equip_name" />
+    <result column="equip_type" jdbcType="VARCHAR" property="equip_type" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, equip_name, equip_type
+  </sql>
+  <select id="findAll" resultType="com.project.entity.Equipment">
+    select
+    *
+    from equipment_table
+  </select>
+  <select id="findByItem" parameterType="java.lang.Integer" resultType="com.project.entity.Equipment">
+    select DISTINCT
+    equipment_table.id,equipment_table.equip_name,equipment_table.equip_type
+    from items_table,item_property_table,property_table,equipment_table
+    where items_table.id = item_property_table.item_id
+    and item_property_table.property_id = property_table.id
+    and property_table.equip_id = equipment_table.id
+    and items_table.id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from equipment_table
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from equipment_table
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.project.entity.Equipment">
+    insert into equipment_table (id, equip_name, equip_type
+      )
+    values (#{id,jdbcType=INTEGER}, #{equip_name,jdbcType=VARCHAR}, #{equip_type,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.project.entity.Equipment">
+    insert into equipment_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="equip_name != null">
+        equip_name,
+      </if>
+      <if test="equip_type != null">
+        equip_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="equip_name != null">
+        #{equip_name,jdbcType=VARCHAR},
+      </if>
+      <if test="equip_type != null">
+        #{equip_type,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.project.entity.Equipment">
+    update equipment_table
+    <set>
+      <if test="equip_name != null">
+        equip_name = #{equip_name,jdbcType=VARCHAR},
+      </if>
+      <if test="equip_type != null">
+        equip_type = #{equip_type,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.project.entity.Equipment">
+    update equipment_table
+    set equip_name = #{equip_name,jdbcType=VARCHAR},
+      equip_type = #{equip_type,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

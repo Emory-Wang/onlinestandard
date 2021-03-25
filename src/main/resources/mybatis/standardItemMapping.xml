@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.project.mapper.standardItemMapper">
+    <insert id="insertOne" parameterType="com.project.entity.StandardItem">
+        insert into standard_item_table
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="standard_id != null">
+                standard_id,
+            </if>
+            <if test="item_id != null">
+                item_id,
+            </if>
+            <if test="property_related != null">
+                property_related,
+            </if>
+            <if test="property_type != null">
+                property_type,
+            </if>
+            <if test="value_1 != null">
+                value_1,
+            </if>
+            <if test="value_2 != null">
+                value_2,
+            </if>
+            <if test="required != null">
+                required,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="standard_id != null">
+                #{standard_id,jdbcType=INTEGER},
+            </if>
+            <if test="item_id != null">
+                #{item_id,jdbcType=INTEGER},
+            </if>
+            <if test="property_related != null">
+                #{property_related,jdbcType=BOOLEAN},
+            </if>
+            <if test="property_type != null">
+                #{property_type,jdbcType=BOOLEAN},
+            </if>
+            <if test="value_1 != null">
+                #{value_1,jdbcType=INTEGER},
+            </if>
+            <if test="value_2 != null">
+                #{value_2,jdbcType=INTEGER},
+            </if>
+            <if test="required != null">
+                #{required,jdbcType=BOOLEAN},
+            </if>
+        </trim>
+    </insert>
+
+    <!--这里的required从哪里来？模板中的item没有对它定义-->
+    <insert id="insertMulti" parameterType="java.util.List">
+        INSERT INTO  standard_item_table
+        (
+        standard_id, item_id, property_related,required
+        )VALUES
+        <foreach collection="list" index="index" item="item" separator=","  >
+            (
+            #{item.standard_id,jdbcType=INTEGER}, #{item.item_id,jdbcType=INTEGER}, #{item.property_related,jdbcType=BOOLEAN}, #{item.required,jdbcType=BOOLEAN}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from standard_item_table
+        where standard_id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <select id="findRequired" resultType="com.project.entity.StandardItem">
+        select * from standard_item_table
+        where standard_id = #{standardId}
+        and item_id = #{itemId}
+    </select>
+
+    <update id="edit" parameterType="com.project.entity.StandardItem">
+        update standard_item_table
+        <set>
+            <if test="property_type != null">
+                property_type = #{property_type,jdbcType=BOOLEAN},
+            </if>
+            <if test="value_1 != null">
+                value_1 = #{value_1,jdbcType=INTEGER},
+            </if>
+            <if test="value_2 != null">
+                value_2 = #{value_2,jdbcType=INTEGER},
+            </if>
+            <if test="required != null">
+                required = #{required,jdbcType=BOOLEAN},
+            </if>
+        </set>
+        where standard_id = #{standard_id}
+        and item_id = #{item_id}
+    </update>
+
+</mapper>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mapper.itemPropertyMapper">
+  <resultMap id="BaseResultMap" type="com.project.entity.ItemProperty">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="item_id" jdbcType="INTEGER" property="item_id" />
+    <result column="property_id" jdbcType="INTEGER" property="property_id" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, item_id, property_id
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from item_property_table
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from item_property_table
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByItemId" parameterType="java.lang.Integer">
+    delete from item_property_table
+    where item_id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.project.entity.ItemProperty">
+    insert into item_property_table (id, item_id, property_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{item_id,jdbcType=INTEGER}, #{property_id,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.project.entity.ItemProperty">
+    insert into item_property_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="item_id != null">
+        item_id,
+      </if>
+      <if test="property_id != null">
+        property_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="item_id != null">
+        #{item_id,jdbcType=INTEGER},
+      </if>
+      <if test="property_id != null">
+        #{property_id,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.project.entity.ItemProperty">
+    update item_property_table
+    <set>
+      <if test="item_id != null">
+        item_id = #{item_id,jdbcType=INTEGER},
+      </if>
+      <if test="property_id != null">
+        property_id = #{property_id,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.project.entity.ItemProperty">
+    update item_property_table
+    set item_id = #{item_id,jdbcType=INTEGER},
+      property_id = #{property_id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="findAllEquips" resultType="com.project.entity.Equipment">
+    select equipment_table.id,equip_name from equipment_table,property_table,item_property_table
+    where item_property_table.property_id = property_table.id
+    and property_table.equip_id = equipment_table.id
+    and item_id = #{id,jdbcType=INTEGER}
+    group by equipment_table.id
+  </select>
+
+  <select id="findAll" resultType="com.project.entity.ItemProperty">
+    select * from item_property_table
+    where item_id = #{id,jdbcType=INTEGER}
+  </select>
+
+</mapper>

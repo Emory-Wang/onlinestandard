@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mapper.templateLevelMapper">
+
+    <resultMap id="getThree" type="com.project.entity.FirstLevel">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <collection property="children" ofType="com.project.entity.SecondLevel">
+            <id property="id" column="second_id"></id>
+            <result property="name" column="second_name"></result>
+            <result property="first_level_id" column="first_level_id"></result>
+        </collection>
+    </resultMap>
+    <!--按照传进来的template_id筛选出的三层数据-->
+    <select id="findThree" parameterType="java.lang.Integer" resultMap="getThree">
+        select first_level_table.id,first_level_table.name,
+        second_level_table.id as second_id,second_level_table.name as second_name,second_level_table.first_level_id
+        from first_level_table,second_level_table,template_level_table
+        where first_level_table.id = second_level_table.first_level_id
+        and template_level_table.second_level_id = second_level_table.id
+        and template_id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="findFirstRemainder" parameterType="java.util.List" resultType="com.project.entity.FirstLevel">
+        select first_level_table.id,first_level_table.name
+        from template_level_table,first_level_table,second_level_table
+        where first_level_table.id = second_level_table.first_level_id
+        <if test="list!=null">
+            and second_level_table.id not in
+            <foreach item="item" collection="list" index="index" open="("
+                     separator="," close=")">
+                #{item.second_level_id}
+            </foreach>
+        </if>
+        group by first_level_table.id
+    </select>
+
+    <select id="findSecondRemainder" resultType="com.project.entity.SecondLevel">
+        select second_level_table.id,second_level_table.name,second_level_table.first_level_id
+        from second_level_table
+        where second_level_table.first_level_id = #{firstId}
+        <if test="list!=null">
+            and second_level_table.id not in
+            <foreach item="item" collection="list" index="index" open="("
+                     separator="," close=")">
+                #{item.second_level_id}
+            </foreach>
+        </if>
+    </select>
+
+
+    <resultMap id="BaseResultMap" type="com.project.entity.TemplateLevel">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="template_id" jdbcType="INTEGER" property="template_id"/>
+        <result column="second_level_id" jdbcType="INTEGER" property="second_level_id"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, template_id, second_level_id
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from template_level_table
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectByTempId" parameterType="java.lang.Integer" resultType="com.project.entity.TemplateLevel">
+    select
+    *
+    from template_level_table
+    where template_id = #{id,jdbcType=INTEGER}
+  </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from template_level_table
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <delete id="deleteSecondLevel" >
+    delete from template_level_table
+    where template_id = #{tempId} and second_level_id = #{secondId}
+  </delete>
+    <delete id="deleteFirstLevel" >
+        delete from template_level_table
+        where template_id = #{tempId}
+        <if test="list!=null">
+            and second_level_id in
+            <foreach item="item" collection="list" index="index" open="("
+                     separator="," close=")">
+                #{item.id}
+            </foreach>
+        </if>
+    </delete>
+    <insert id="insert" parameterType="com.project.entity.TemplateLevel">
+    insert into template_level_table (id, template_id, second_level_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{template_id,jdbcType=INTEGER}, #{second_level_id,jdbcType=INTEGER}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.project.entity.TemplateLevel">
+        insert into template_level_table
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="template_id != null">
+                template_id,
+            </if>
+            <if test="second_level_id != null">
+                second_level_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="template_id != null">
+                #{template_id,jdbcType=INTEGER},
+            </if>
+            <if test="second_level_id != null">
+                #{second_level_id,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.project.entity.TemplateLevel">
+        update template_level_table
+        <set>
+            <if test="template_id != null">
+                template_id = #{template_id,jdbcType=INTEGER},
+            </if>
+            <if test="second_level_id != null">
+                second_level_id = #{second_level_id,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.project.entity.TemplateLevel">
+    update template_level_table
+    set template_id = #{template_id,jdbcType=INTEGER},
+      second_level_id = #{second_level_id,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

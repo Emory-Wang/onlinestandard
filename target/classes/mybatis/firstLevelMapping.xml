@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.project.mapper.firstLevelMapper">
+    <resultMap id="getThree" type="com.project.entity.FirstLevel">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <collection property="secondLevels" ofType="com.project.entity.SecondLevel">
+            <id property="id" column="second_id"></id>
+            <result property="name" column="second_name"></result>
+            <result property="first_level_id" column="first_level_id"></result>
+            <collection property="items" ofType="com.project.entity.Item">
+                <id property="id" column="item_id"></id>
+                <result property="first_level_id" column="first_level_id"></result>
+                <result property="second_level_id" column="second_level_id"></result>
+                <result property="short_cut" column="short_cut"></result>
+                <result property="property_related" column="property_related"></result>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <!--item equipment property三层数据-->
+    <resultMap id="getItems" type="com.project.entity.Item">
+        <id property="id" column="id"></id>
+        <result property="first_level_id" column="first_level_id"></result>
+        <result property="second_level_id" column="second_level_id"></result>
+        <result property="short_cut" column="short_cut"></result>
+        <result property="property_related" column="property_related"></result>
+        <collection property="equipmentList" ofType="com.project.entity.Equipment">
+            <id property="id" column="id"></id>
+            <result property="equip_name" column="equip_name"></result>
+            <result property="equip_type" column="equip_type"></result>
+            <collection property="properties" ofType="com.project.entity.Property">
+                <id property="id" column="item_id"></id>
+                <result property="equip_id" column="equip_id"></result>
+                <result property="name" column="name"></result>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="findFirstLevel"  resultType="com.alibaba.fastjson.JSONObject">
+        select *
+        from first_level_table
+    </select>
+
+    <!--按照传进来的template_id筛选出的三层数据-->
+    <select id="findThree" parameterType="java.lang.Integer" resultMap="getThree">
+        select first_level_table.id,first_level_table.name,
+        second_level_table.id as second_id,second_level_table.name as second_name,second_level_table.first_level_id,
+        items_table.id as item_id,items_table.first_level_id,items_table.second_level_id ,items_table.short_cut,property_related
+        from first_level_table,second_level_table,items_table,template_table,template_level_table
+        where first_level_table.id = second_level_table.first_level_id
+        and second_level_table.id = items_table.second_level_id
+        and template_table.id = template_level_table.template_id
+        and template_level_table.second_level_id = second_level_table.id
+        and template_table.id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <!--按照传进来的standard_id筛选出的三层数据-->
+    <select id="findThreeByStandard" parameterType="java.lang.Integer" resultMap="getThree">
+        select first_level_table.id,first_level_table.name,
+        second_level_table.id as second_id,second_level_table.name as second_name,second_level_table.first_level_id,
+        items_table.id as item_id,items_table.first_level_id,items_table.second_level_id ,items_table.short_cut,standard_item_table.property_related,standard_item_table.required
+        from standard_item_table,items_table,first_level_table,second_level_table
+        where first_level_table.id = second_level_table.first_level_id
+        and second_level_table.id = items_table.second_level_id
+        and standard_item_table.item_id = items_table.id
+        and standard_item_table.standard_id = #{standard_id,jdbcType=INTEGER}
+    </select>
+
+    <!--查找所有item(包含equipment)  first_level_id,second_level_id,short_cut,property_related,equip_name-->
+    <select id="findItems2"  resultType="com.alibaba.fastjson.JSONObject">
+        select items_table.first_level_id,items_table.second_level_id,items_table.short_cut,
+        from items_table,item_property_table,property_table,equipment_table
+        where items_table.id = item_property_table.item_id
+        and item_property_table.property_id = property_table.id
+        and property_table.equip_id = equipment_table.id
+    </select>
+    <!--查找所有item(包含equipment)  first_level_id,second_level_id,short_cut,property_related,equip_name-->
+    <select id="findItems"  resultMap="getItems">
+        select *
+        from items_table,item_property_table,property_table,equipment_table
+        where items_table.id = item_property_table.item_id
+        and item_property_table.property_id = property_table.id
+        and property_table.equip_id = equipment_table.id
+        union
+        select *
+        from items_table,item_property_table,property_table,equipment_table
+        where property_related = 0
+    </select>
+
+    <!--查找某一item(包含equipment)下的设备信息 传入item_id和standard_id  -->
+    <select id="findItemEquip" resultType="com.alibaba.fastjson.JSONObject">
+        select distinct standard_item_table.item_id,equipment_table.equip_name,property_table.name,
+        standard_item_table.property_type,standard_item_table.value_1,standard_item_table.value_2,standard_item_table.required
+        from items_table,item_property_table,property_table,equipment_table,standard_item_table
+        where items_table.id = item_property_table.item_id
+        and item_property_table.property_id = property_table.id
+        and property_table.equip_id = equipment_table.id
+        and standard_item_table.item_id = items_table.id
+        and items_table.id = #{item_id,jdbcType=INTEGER}
+        and standard_item_table.standard_id = #{standard_id,jdbcType=INTEGER}
+    </select>
+
+    <!--查找一standard的详细信息 传入standard_id  -->
+    <select id="findStandardInfo"  parameterType="java.lang.Integer" resultType="com.alibaba.fastjson.JSONObject">
+        select distinct first_level_table.name,second_level_table.id,
+        items_table.short_cut as detail,standard_item_table.required as state,standard_item_table.property_related as equstate
+        from standard_item_table,items_table,first_level_table,second_level_table
+        where first_level_table.id = second_level_table.first_level_id
+        and second_level_table.id = items_table.second_level_id
+        and standard_item_table.item_id = items_table.id
+        and standard_item_table.standard_id = #{standard_id,jdbcType=INTEGER}
+    </select>
+
+    <!--查找某一standard下的设备信息 传入standard_id  -->
+    <select id="findEquipInfo" parameterType="java.lang.Integer" resultType="com.alibaba.fastjson.JSONObject">
+        select distinct equipment_table.id,equipment_table.equip_type as type,equipment_table.equip_name as model
+        from items_table,item_property_table,property_table,equipment_table,standard_item_table
+        where items_table.id = item_property_table.item_id
+        and item_property_table.property_id = property_table.id
+        and property_table.equip_id = equipment_table.id
+        and standard_item_table.item_id = items_table.id
+        and standard_item_table.standard_id = #{standard_id,jdbcType=INTEGER}
+    </select>
+
+    <select id="findAll" resultType="com.project.entity.FirstLevel">
+        select * from first_level_table
+    </select>
+
+    <resultMap id="BaseResultMap" type="com.project.entity.FirstLevel">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, name
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from first_level_table
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from first_level_table
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.project.entity.FirstLevel">
+    insert into first_level_table (id, name)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="com.project.entity.FirstLevel">
+    update first_level_table
+    set name = #{name,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

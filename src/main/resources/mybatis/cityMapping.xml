@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.project.mapper.cityMapper">
+    <select id="findProvince" parameterType="java.lang.Integer" resultType="com.project.entity.City">
+        select * from city_table
+        where city_table.id = #{city_id,jdbcType=INTEGER}
+    </select>
+    <select id="findAll" resultType="com.alibaba.fastjson.JSONObject">
+        select city_table.id as id,city_table.name as place from city_table
+    </select>
+
+
+</mapper>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.project.mapper.standardClassMapper">
+    <select id="findAll2" resultType="com.project.entity.StandardClass">
+        select * from class_table
+    </select><select id="findAll" resultType="com.alibaba.fastjson.JSONObject">
+        select class_table.id as id,class_table.name as level from class_table
+    </select>
+
+
+
+</mapper>

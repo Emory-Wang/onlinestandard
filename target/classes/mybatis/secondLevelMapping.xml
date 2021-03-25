@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mapper.secondLevelMapper">
+  <resultMap id="BaseResultMap" type="com.project.entity.SecondLevel">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="first_level_id" jdbcType="INTEGER" property="first_level_id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, first_level_id, name
+  </sql>
+
+  <select id="selectByFirstLevel" parameterType="java.lang.Integer" resultType="com.project.entity.SecondLevel">
+    select
+    *
+    from second_level_table
+    where first_level_id = #{id}
+  </select>
+
+  <select id="selectAll" resultType="com.project.entity.SecondLevel">
+    select
+    *
+    from second_level_table
+  </select>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from second_level_table
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from second_level_table
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.project.entity.SecondLevel">
+    insert into second_level_table (id, first_level_id, name
+      )
+    values (#{id,jdbcType=INTEGER}, #{first_level_id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.project.entity.SecondLevel">
+    update second_level_table
+    set first_level_id = #{first_level_id,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.project.mapper.standardMapper">
+    <resultMap id="getStandardForm" type="com.project.entity.Standard">
+        <id property="id" column="id"></id>
+        <result property="business_id" column="business_id"></result>
+        <result property="class_id" column="class_id"></result>
+        <result property="name" column="name"></result>
+        <result property="file" column="file"></result>
+        <result property="province_id" column="province_id"></result>
+        <result property="city_id" column="city_id"></result>
+        <result property="date" column="date"></result>
+        <association property="business" javaType="Business">
+            <id property="id" column="id"></id>
+            <result property="name" column="name"></result>
+        </association>
+        <association property="standardClass" javaType="StandardClass">
+            <id property="id" column="id"></id>
+            <result property="name" column="name"></result>
+        </association>
+    </resultMap>
+
+    <select id="findAllStandardForm" resultType="com.alibaba.fastjson.JSONObject">
+        select standard_table.id,business_table.name as project,class_table.name as level,standard_table.name,standard_table.date as time,city_table.name as place
+        from standard_table,business_table,class_table,city_table
+        where standard_table.business_id = business_table.id
+        and standard_table.class_id = class_table.id
+        and city_table.id = standard_table.city_id
+        order by standard_table.id
+    </select>
+    <select id="findAllStandardForm2" resultMap="getStandardForm">
+        select standard_table.id,business_table.name,class_table.name,standard_table.name,standard_table.date
+        from standard_table,business_table,class_table
+        where standard_table.business_id = business_table.id
+        and standard_table.class_id = class_table.id
+        order by standard_table.id
+    </select>
+
+    <select id="findAllStandard" resultType="com.project.entity.Standard">
+        select * from standard_table
+    </select>
+
+    <select id="findStandardById" parameterType="java.lang.Integer" resultType="com.alibaba.fastjson.JSONObject">
+        select standard_table.id,business_table.name as project,class_table.name as level,standard_table.name,city_table.name as place
+        from standard_table,business_table,class_table,city_table
+        where standard_table.business_id = business_table.id
+        and standard_table.class_id = class_table.id
+        and city_table.id = standard_table.city_id
+        and standard_table.id = #{standard_id,jdbcType=INTEGER}
+    </select>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.project.entity.Standard">
+        update standard_table
+        <set>
+<!--            <if test="business_id != null">
+                business_id = #{business_id,jdbcType=INTEGER},
+            </if>
+            <if test="class_id != null">
+                class_id = #{class_id,jdbcType=INTEGER},
+            </if>-->
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from standard_table
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.project.entity.Standard">
+        insert into standard_table
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="business_id != null">
+                business_id,
+            </if>
+            <if test="class_id != null">
+                class_id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="file != null">
+                file,
+            </if>
+            <if test="province_id != null">
+                province_id,
+            </if>
+            <if test="city_id != null">
+                city_id,
+            </if>
+            <if test="date != null">
+                date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="business_id != null">
+                #{business_id,jdbcType=INTEGER},
+            </if>
+            <if test="class_id != null">
+                #{class_id,jdbcType=INTEGER},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="file != null">
+                #{file,jdbcType=VARCHAR},
+            </if>
+            <if test="province_id != null">
+                #{province_id,jdbcType=INTEGER},
+            </if>
+            <if test="city_id != null">
+                #{city_id,jdbcType=INTEGER},
+            </if>
+            <if test="date != null">
+                #{date,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>
